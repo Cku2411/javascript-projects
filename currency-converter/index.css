@@ -1,0 +1,18 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  background: black;
+}
+
+.container {
+  border: 1px solid;
+  color: white;
+  background: gray;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
