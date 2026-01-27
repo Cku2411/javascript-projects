@@ -1,0 +1,83 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #873e23;
+  font-family: "Courier New", Courier, monospace;
+  margin: 0;
+  color: white;
+}
+
+img {
+  width: 100px;
+  position: absolute;
+  align-items: center;
+  left: 50%;
+  top: 20%;
+  transform: translate(-50%);
+  z-index: 2;
+}
+
+.clock {
+  background-color: rgb(43, 40, 40);
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  border: 5px solid darkgray;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+
+.hours div {
+  color: lightgoldenrodyellow;
+  position: absolute;
+  font-size: 27px;
+  font-weight: bold;
+}
+
+.three {
+  top: 50%;
+  transform: translate(0, -50%);
+  right: 5px;
+}
+
+.six {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nine {
+  top: 50%;
+  transform: translate(0, -50%);
+  left: 5px;
+}
+
+.twelve {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.arrows {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.arrows::before {
+  content: "";
+  width: 25px;
+  height: 25px;
+  background-color: darkgreen;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  z-index: 4;
+}
