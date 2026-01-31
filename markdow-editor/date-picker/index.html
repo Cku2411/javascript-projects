@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>Date picker</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Date picker</h1>
+      <div class="date-wrapper">
+        <button class="version">V0</button>
+        <input
+          type="text"
+          placeholder="Select your date"
+          class="date-picker-input"
+          readonly
+        />
+
+        <input type="date" />
+        <!-- render datePicker -->
+        <div class="date-picker">
+          <div class="date-picker-header">
+            <div class="date-picker-nav">
+              <button>pre month</button>
+            </div>
+            <span class="date-picker-title"></span>
+            <div class="date-picker-nav">
+              <button>next month</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="index.js"></script>
+  </body>
+</html>
