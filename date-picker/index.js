@@ -129,6 +129,10 @@ function selectDate(year, month, day) {
   inputEl.value = `${months[month]} ${day}, ${year}`;
   renderCalendar();
 }
+function getMondayFirstDay(year, month) {
+  let d = new Date(year, month, 1).getDay(); // 0 = CN
+  return d === 0 ? 6 : d - 1; // dịch: T2=0, T3=1, ..., CN=6
+}
 
 function renderCalendar() {
   const monthNames = [
@@ -153,18 +157,22 @@ function renderCalendar() {
   titleEl.textContent = `${monthNames[currentMonth]} ${currentYear}`;
 
   // get the first day of the month
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const firstDay = getMondayFirstDay(currentYear, currentMonth);
   // tinh total day of months bang cach check ngay cuoi thang
   const totalDayOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
   // lay ngay cuooi cua thangs truoc
   const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+  console.log({ totalDayOfMonth, prevMonthDays, firstDay });
 
   let calendar = [];
 
   // add ngay thang truoc
-  for (let i = firstDay - 1; i > 0; i--) {
-    calendar.push({ day: prevMonthDays - i, type: "prev" });
+  //   - Nếu là Chủ Nhật (0) → trả về 6 (ngày cuối tuần).
+  // - Nếu là Thứ Hai (1) → trả về 0 (ngày đầu tuần).
+
+  for (let i = firstDay; i > 0; i--) {
+    calendar.push({ day: prevMonthDays - i + 1, type: "prev" });
   }
 
   // add ngay thang nay
