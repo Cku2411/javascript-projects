@@ -4,13 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="index.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    />
     <title>Date picker</title>
   </head>
   <body>
     <div class="container">
       <h1>Date picker</h1>
+      <button class="version-badge">V0</button>
       <div class="date-wrapper">
-        <button class="version">V0</button>
         <input
           type="text"
           placeholder="Select your date"
@@ -18,17 +22,39 @@
           readonly
         />
 
-        <input type="date" />
         <!-- render datePicker -->
-        <div class="date-picker">
+        <div class="date-picker-container">
           <div class="date-picker-header">
             <div class="date-picker-nav">
-              <button>pre month</button>
+              <button class="pre-month">
+                <i class="fa-solid fa-angle-left"></i>
+              </button>
             </div>
             <span class="date-picker-title"></span>
             <div class="date-picker-nav">
-              <button>next month</button>
+              <button class="next-month">
+                <i class="fa-solid fa-angle-right"></i>
+              </button>
             </div>
+          </div>
+
+          <div class="date-picker-calendar">
+            <div class="date-picker-weekdays">
+              <div class="date-picker__weekday">Mo</div>
+              <div class="date-picker__weekday">Tu</div>
+              <div class="date-picker__weekday">We</div>
+              <div class="date-picker__weekday">Th</div>
+              <div class="date-picker__weekday">Fr</div>
+              <div class="date-picker__weekday">Sa</div>
+              <div class="date-picker__weekday">Su</div>
+            </div>
+
+            <div class="date-picker-days"></div>
+          </div>
+
+          <div class="date-picker__footer">
+            <button class="date-picker__today-btn">Today</button>
+            <button class="date-picker__clear-btn">Clear</button>
           </div>
         </div>
       </div>
