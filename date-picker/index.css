@@ -17,6 +17,9 @@ body {
 .version-badge {
   display: inline-block;
   padding: 4px 12px;
+  background-color: #fee2e2;
+  color: #dc2626;
+  border-radius: 20px;
 }
 
 .date-wrapper {
@@ -74,7 +77,7 @@ body {
 }
 
 .date-picker-daycell:hover {
-  background: lightgray;
+  background: lightcoral;
 }
 
 .date-picker-daycell.disabled {
@@ -82,8 +85,13 @@ body {
   pointer-events: none; /* không cho click */
 }
 
+.date-picker-daycell.selected {
+  background-color: lightcoral;
+}
+
 .today {
   background-color: red;
+  border-radius: 50%;
 }
 
 /* ====footer */

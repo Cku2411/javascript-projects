@@ -209,16 +209,21 @@ function renderCalendar() {
     const todayYear = today.getFullYear();
 
     if (
-      day === todayDate &&
+      day.day === todayDate &&
+      day.type == "current" &&
       currentMonth === todayMonth &&
       currentYear === todayYear
     ) {
       daydiv.classList.add("today");
     }
 
-    // if (selectedDate && day == selectedDate.getDate()) {
-    //   daydiv.style.backgroundColor = "lightgray";
-    // }
+    if (
+      selectedDate &&
+      day.day == selectedDate.getDate() &&
+      day.type == "current"
+    ) {
+      daydiv.style.backgroundColor = "lightcoral";
+    }
 
     dayContainerEl.appendChild(daydiv);
   });
