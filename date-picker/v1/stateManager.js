@@ -1,3 +1,5 @@
+import EVENTS, { stateEvent } from "./constants.js";
+
 class StateManager {
   constructor(eventBus, initialState = {}) {
     this.eventBus = eventBus;
@@ -31,7 +33,7 @@ class StateManager {
       //   check if value change
       if (this.previousState[key] != this.state[key]) {
         // emit event for updateState (updateState, currentState)
-        this.eventBus.emit(`state:${key}`, {
+        this.eventBus.emit(stateEvent(key), {
           value: this.state[key],
           previous: this.previousState[key],
         });
@@ -39,7 +41,7 @@ class StateManager {
     });
 
     // emit state change
-    this.eventBus.emit(`state:change`, {
+    this.eventBus.emit(EVENTS.STATE_CHANGE, {
       state: this.getState(),
       previous: this.previousState,
       changes: updateState,
@@ -51,7 +53,7 @@ class StateManager {
     });
 
     // emit event
-    this.eventBus.emit(`date:select`, { date });
+    this.eventBus.emit(EVENTS.DATE_SELECT, { date });
   }
   setView(month, year) {
     if (month > 11) {
@@ -65,7 +67,7 @@ class StateManager {
     this.setState({ viewMonth: month, viewYear: year });
 
     // emit event
-    this.eventBus.emit(`view:change`, { month, year });
+    this.eventBus.emit(EVENTS.VIEW_CHANGE, { month, year });
   }
 
   navigate(monthOffSet = 0, yearOffset = 0) {
@@ -79,13 +81,13 @@ class StateManager {
   open() {
     if (!this.state.isOpen) {
       this.setState({ isOpen: true });
-      this.eventBus.emit("picker:open");
+      this.eventBus.emit(EVENTS.PICKER_OPEN);
     }
   }
   close() {
     if (this.state.isOpen) {
       this.setState({ isOpen: false });
-      this.eventBus.emit("picker:close");
+      this.eventBus.emit(EVENTS.PICKER_CLOSE);
     }
   }
   toggle() {
@@ -114,7 +116,7 @@ class StateManager {
       ...initialState,
     });
 
-    this.eventBus.emit("state:reset", {
+    this.eventBus.emit(EVENTS.STATE_RESET, {
       state: this.getState(),
     });
   }
