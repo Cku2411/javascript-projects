@@ -1,0 +1,406 @@
+/**
+ * CalendarView - Dedicated Rendering Class
+ *
+ * Handles all DOM rendering for the DatePicker.
+ * Separation: StateManager owns data, CalendarView owns presentation.
+ *
+ * Benefits:
+ * - Rendering logic is isolated
+ * - Easier to test
+ * - Cleaner DatePicker class
+ *
+ * Note: SlotManager for customization will be added in v3-slot-manager
+ */
+
+import { EVENTS } from './events.js';
+
+class CalendarView {
+  /**
+   * @param {HTMLElement} container - Container element for the picker
+   * @param {EventBus} eventBus - EventBus for communication
+   * @param {Object} options - Configuration options
+   */
+  constructor(container, eventBus, options = {}) {
+    this.container = container;
+    this.eventBus = eventBus;
+    this.options = options;
+
+    // Cache for DOM references
+    this.elements = {
+      header: null,
+      title: null,
+      calendar: null,
+      weekdays: null,
+      days: null,
+      footer: null,
+    };
+
+    // Track current render state
+    this.currentRenderState = null;
+  }
+
+  // ============================================
+  // Date Helper Methods (will be extracted to date-utils in v4)
+  // ============================================
+
+  _getMonthName(month) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return months[month];
+  }
+
+  _isSameDay(date1, date2) {
+    if (!date1 || !date2) return false;
+    return (
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    );
+  }
+
+  _isWeekend(date) {
+    const day = date.getDay();
+    return day === 0 || day === 6;
+  }
+
+  _generateMonthGrid(year, month, selectedDate) {
+    const days = [];
+    const today = new Date();
+    const firstDay = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    const prevMonthDays = new Date(year, month, 0).getDate();
+
+    // Calculate previous month/year
+    const prevMonth = month === 0 ? 11 : month - 1;
+    const prevYear = month === 0 ? year - 1 : year;
+
+    // Calculate next month/year
+    const nextMonth = month === 11 ? 0 : month + 1;
+    const nextYear = month === 11 ? year + 1 : year;
+
+    // Previous month overflow days
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const day = prevMonthDays - i;
+      const date = new Date(prevYear, prevMonth, day);
+
+      days.push({
+        day,
+        month: prevMonth,
+        year: prevYear,
+        date,
+        isCurrentMonth: false,
+        isToday: this._isSameDay(date, today),
+        isSelected: this._isSameDay(date, selectedDate),
+        isWeekend: this._isWeekend(date),
+        isDisabled: false,
+      });
+    }
+
+    // Current month days
+    for (let day = 1; day <= totalDays; day++) {
+      const date = new Date(year, month, day);
+
+      days.push({
+        day,
+        month,
+        year,
+        date,
+        isCurrentMonth: true,
+        isToday: this._isSameDay(date, today),
+        isSelected: this._isSameDay(date, selectedDate),
+        isWeekend: this._isWeekend(date),
+        isDisabled: false,
+      });
+    }
+
+    // Next month overflow days (fill to 42 cells for 6 rows)
+    const totalCells = 42;
+    const remainingCells = totalCells - days.length;
+
+    for (let day = 1; day <= remainingCells; day++) {
+      const date = new Date(nextYear, nextMonth, day);
+
+      days.push({
+        day,
+        month: nextMonth,
+        year: nextYear,
+        date,
+        isCurrentMonth: false,
+        isToday: this._isSameDay(date, today),
+        isSelected: this._isSameDay(date, selectedDate),
+        isWeekend: this._isWeekend(date),
+        isDisabled: false,
+      });
+    }
+
+    return days;
+  }
+
+  // ============================================
+  // HTML Rendering Methods (will use SlotManager in v3)
+  // ============================================
+
+  _renderHeader(monthName, year) {
+    return `
+      <div class="bw-datepicker__header">
+        <div class="bw-datepicker__nav">
+          <button class="bw-datepicker__nav-btn" data-action="prev-year" title="Previous Year">«</button>
+          <button class="bw-datepicker__nav-btn" data-action="prev-month" title="Previous Month">‹</button>
+        </div>
+        <span class="bw-datepicker__title">${monthName} ${year}</span>
+        <div class="bw-datepicker__nav">
+          <button class="bw-datepicker__nav-btn" data-action="next-month" title="Next Month">›</button>
+          <button class="bw-datepicker__nav-btn" data-action="next-year" title="Next Year">»</button>
+        </div>
+      </div>
+    `;
+  }
+
+  _renderWeekdays() {
+    const weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    return weekdays
+      .map((name) => `<div class="bw-datepicker__weekday">${name}</div>`)
+      .join('');
+  }
+
+  _renderDay(dayData) {
+    const classes = ['bw-datepicker__day'];
+
+    if (!dayData.isCurrentMonth) {
+      classes.push('bw-datepicker__day--other-month');
+    }
+    if (dayData.isToday) {
+      classes.push('bw-datepicker__day--today');
+    }
+    if (dayData.isSelected) {
+      classes.push('bw-datepicker__day--selected');
+    }
+    if (dayData.isWeekend) {
+      classes.push('bw-datepicker__day--weekend');
+    }
+    if (dayData.isDisabled) {
+      classes.push('bw-datepicker__day--disabled');
+    }
+
+    return `
+      <div class="${classes.join(' ')}"
+           data-day="${dayData.day}"
+           data-month="${dayData.month}"
+           data-year="${dayData.year}">
+        ${dayData.day}
+      </div>
+    `;
+  }
+
+  _renderFooter(hasSelection) {
+    return `
+      <div class="bw-datepicker__footer">
+        <button class="bw-datepicker__today-btn" data-action="today">Today</button>
+        <button class="bw-datepicker__clear-btn" data-action="clear" ${
+          !hasSelection ? 'disabled' : ''
+        }>Clear</button>
+      </div>
+    `;
+  }
+
+  // ============================================
+  // Main Render Methods
+  // ============================================
+
+  /**
+   * Full render of the calendar
+   * @param {Object} state - Current state from StateManager
+   */
+  render(state) {
+    const { viewMonth, viewYear, selectedDate, isOpen } = state;
+
+    // Prepare render context
+    const renderContext = {
+      month: viewMonth,
+      year: viewYear,
+      monthName: this._getMonthName(viewMonth),
+      selectedDate,
+      isOpen,
+      days: this._generateMonthGrid(viewYear, viewMonth, selectedDate),
+    };
+
+    // Store for reference
+    this.currentRenderState = renderContext;
+
+    // Build complete HTML
+    const headerHtml = this._renderHeader(
+      renderContext.monthName,
+      renderContext.year
+    );
+    const weekdaysHtml = this._renderWeekdays();
+    const daysHtml = renderContext.days
+      .map((day) => this._renderDay(day))
+      .join('');
+    const footerHtml = this._renderFooter(!!selectedDate);
+
+    const html = `
+      ${headerHtml}
+      <div class="bw-datepicker__calendar">
+        <div class="bw-datepicker__weekdays">
+          ${weekdaysHtml}
+        </div>
+        <div class="bw-datepicker__days">
+          ${daysHtml}
+        </div>
+      </div>
+      ${footerHtml}
+    `;
+
+    // Update DOM
+    this.container.innerHTML = html;
+
+    // Cache element references
+    this._cacheElements();
+
+    // Update visibility
+    this.container.style.display = isOpen ? 'block' : 'none';
+
+    // Emit render complete event
+    this.eventBus.emit(EVENTS.VIEW_RENDERED, { state: renderContext });
+  }
+
+  /**
+   * Partial update - just the days grid (more efficient for navigation)
+   * @param {Object} state - Current state
+   */
+  renderDays(state) {
+    const { viewMonth, viewYear, selectedDate } = state;
+
+    if (!this.elements.days) {
+      // Fallback to full render if no cached element
+      return this.render(state);
+    }
+
+    // Generate new days data
+    const days = this._generateMonthGrid(viewYear, viewMonth, selectedDate);
+
+    // Render just the days
+    const daysHtml = days.map((day) => this._renderDay(day)).join('');
+
+    this.elements.days.innerHTML = daysHtml;
+
+    // Update title
+    if (this.elements.title) {
+      this.elements.title.textContent = `${this._getMonthName(
+        viewMonth
+      )} ${viewYear}`;
+    }
+
+    // Emit partial render event
+    this.eventBus.emit(EVENTS.VIEW_DAYS_RENDERED, {
+      month: viewMonth,
+      year: viewYear,
+    });
+  }
+
+  /**
+   * Update just the selected state (most efficient)
+   * @param {Date|null} selectedDate - New selected date
+   * @param {Date|null} previousDate - Previous selected date
+   */
+  updateSelection(selectedDate, previousDate) {
+    if (!this.elements.days) return;
+
+    // Remove selection from previous
+    if (previousDate) {
+      const prevEl = this._findDayElement(previousDate);
+      if (prevEl) {
+        prevEl.classList.remove('bw-datepicker__day--selected');
+      }
+    }
+
+    // Add selection to new
+    if (selectedDate) {
+      const newEl = this._findDayElement(selectedDate);
+      if (newEl) {
+        newEl.classList.add('bw-datepicker__day--selected');
+      }
+    }
+
+    // Update clear button state
+    const clearBtn = this.container.querySelector('[data-action="clear"]');
+    if (clearBtn) {
+      clearBtn.disabled = !selectedDate;
+    }
+  }
+
+  /**
+   * Toggle visibility
+   * @param {boolean} isOpen
+   */
+  setVisibility(isOpen) {
+    this.container.style.display = isOpen ? 'block' : 'none';
+
+    if (isOpen) {
+      this.eventBus.emit(EVENTS.VIEW_SHOWN);
+    } else {
+      this.eventBus.emit(EVENTS.VIEW_HIDDEN);
+    }
+  }
+
+  // ============================================
+  // Helper Methods
+  // ============================================
+
+  /**
+   * Cache references to key DOM elements
+   */
+  _cacheElements() {
+    this.elements = {
+      header: this.container.querySelector('.bw-datepicker__header'),
+      title: this.container.querySelector('.bw-datepicker__title'),
+      calendar: this.container.querySelector('.bw-datepicker__calendar'),
+      weekdays: this.container.querySelector('.bw-datepicker__weekdays'),
+      days: this.container.querySelector('.bw-datepicker__days'),
+      footer: this.container.querySelector('.bw-datepicker__footer'),
+    };
+  }
+
+  /**
+   * Find a day element by date
+   * @param {Date} date
+   * @returns {HTMLElement|null}
+   */
+  _findDayElement(date) {
+    if (!this.elements.days || !date) return null;
+
+    return this.elements.days.querySelector(
+      `[data-day="${date.getDate()}"][data-month="${date.getMonth()}"][data-year="${date.getFullYear()}"]`
+    );
+  }
+
+  // ============================================
+  // Cleanup
+  // ============================================
+
+  /**
+   * Destroy the view and cleanup
+   */
+  destroy() {
+    // Clear container
+    this.container.innerHTML = '';
+
+    // Clear references
+    this.elements = {};
+    this.currentRenderState = null;
+  }
+}
+
+export default CalendarView;

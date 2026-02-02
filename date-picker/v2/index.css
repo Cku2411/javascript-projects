@@ -1,0 +1,119 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: black;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  color: wheat;
+}
+
+.container {
+  text-align: center;
+}
+.version-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background-color: #fee2e2;
+  color: #dc2626;
+  border-radius: 20px;
+}
+
+.date-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.date-picker-input {
+  width: 280px;
+  padding: 10px;
+  outline: none;
+  font-size: 16px;
+  border-radius: 10px;
+}
+
+.date-picker-container {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 280px;
+  background: brown;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.3);
+}
+
+.date-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+.date-picker-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  width: 100%;
+  justify-content: space-between;
+  text-align: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+  padding: 4px 0;
+}
+
+.date-picker-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  gap: 4px;
+  padding: 4px;
+}
+
+.date-picker-daycell {
+  cursor: pointer;
+}
+
+.date-picker-daycell:hover {
+  background: lightcoral;
+}
+
+.date-picker-daycell.disabled {
+  opacity: 0.4;
+  pointer-events: none; /* không cho click */
+}
+
+.date-picker-daycell.selected {
+  background-color: lightcoral;
+}
+
+.today {
+  background-color: red;
+  border-radius: 50%;
+}
+
+/* ====footer */
+.date-picker__footer {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.date-picker__today-btn,
+.date-picker__clear-btn {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.date-picker__today-btn {
+  background-color: red;
+  color: #fff;
+}
