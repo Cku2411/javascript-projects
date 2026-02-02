@@ -72,7 +72,6 @@ class StateManager {
 
   navigate(monthOffSet = 0, yearOffset = 0) {
     const newMonth = this.state.viewMonth + monthOffSet;
-
     const newYear = this.state.viewYear + yearOffset;
 
     this.setView(newMonth, newYear);

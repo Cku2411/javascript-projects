@@ -1,3 +1,4 @@
+import EVENTS, { stateEvent } from "./constants.js";
 import EventBus from "./eventBus.js";
 import StateManager from "./stateManager.js";
 
@@ -14,54 +15,74 @@ export class DatePicker {
     this.dayscontainer = null;
     this.titleEl = null;
 
-    // this._onInputClick = this._onInputClick.bind(this);
-    // this._onDocumentClick = this._onDocumentClick.bind(this);
+    this._onInputClick = this._onInputClick.bind(this);
+    this._onDocumentClick = this._onDocumentClick.bind(this);
     // this._onKeyDown = this._onKeyDown.bind(this);
 
     this._createDOM();
     this._setUpEventListeners();
-    // this._subscribeToState();
+    this._subscribeToState();
     this._render();
   }
 
   _createDOM() {
-    console.log("khoi tao ");
-
     this.pickerEl = document.createElement("div");
     this.pickerEl.className = "date-picker-container";
     this.pickerEl.innerHTML = `
-          <div class="date-picker-header">
-            <div class="date-picker-nav">
-              <button class="pre-month">
-                <i class="fa-solid fa-angle-left"></i>
-              </button>
-            </div>
-            <span class="date-picker-title"></span>
-            <div class="date-picker-nav">
-              <button class="next-month">
-                <i class="fa-solid fa-angle-right"></i>
-              </button>
-            </div>
-          </div>
+    <div class="date-picker-header">
+      <div class="date-picker-nav">
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="prev-year"
+          title="Previous Year"
+        >
+          «
+        </button>
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="prev-month"
+          title="Previous Month"
+        >
+          ‹
+        </button>
+      </div>
+      <span class="date-picker-title"></span>
+      <div class="bw-datepicker__nav">
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="next-month"
+          title="Next Month"
+        >
+          ›
+        </button>
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="next-year"
+          title="Next Year"
+        >
+          »
+        </button>
+      </div>
+    </div>
 
-          <div class="date-picker-calendar">
-            <div class="date-picker-weekdays">
-              <div class="date-picker__weekday">Mo</div>
-              <div class="date-picker__weekday">Tu</div>
-              <div class="date-picker__weekday">We</div>
-              <div class="date-picker__weekday">Th</div>
-              <div class="date-picker__weekday">Fr</div>
-              <div class="date-picker__weekday">Sa</div>
-              <div class="date-picker__weekday">Su</div>
-            </div>
+    <div class="date-picker-calendar">
+      <div class="date-picker-weekdays">
+        <div class="date-picker__weekday">Mo</div>
+        <div class="date-picker__weekday">Tu</div>
+        <div class="date-picker__weekday">We</div>
+        <div class="date-picker__weekday">Th</div>
+        <div class="date-picker__weekday">Fr</div>
+        <div class="date-picker__weekday">Sa</div>
+        <div class="date-picker__weekday">Su</div>
+      </div>
 
-            <div class="date-picker-days"></div>
-          </div>
+      <div class="date-picker-days"></div>
+    </div>
 
-          <div class="date-picker__footer">
-            <button class="date-picker__today-btn">Today</button>
-            <button class="date-picker__clear-btn">Clear</button>
-          </div>
+    <div class="date-picker__footer">
+      <button class="date-picker__today-btn" data-action="today">Today</button>
+      <button class="date-picker__clear-btn" data-action="clear">Clear</button>
+    </div>
     `;
 
     this.dayscontainer = this.pickerEl.querySelector(".date-picker-days");
@@ -74,29 +95,145 @@ export class DatePicker {
     );
   }
 
+  _onInputClick(e) {
+    e.stopPropagation();
+    this.state.toggle();
+  }
+
+  _onDocumentClick(e) {
+    if (!this.pickerEl.contains(e.target) && !this.inputEl.contains(e.target)) {
+      this.state.close();
+    }
+  }
+
   _setUpEventListeners() {
     // input event listeners
-    this.inputEl.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (!this.state.get("isOpen")) {
-        this.state.open();
-        this.pickerEl.style.display = "block";
-      } else {
-        this.state.close();
-        this.pickerEl.style.display = "none";
-      }
-    });
+    this.inputEl.addEventListener("click", this._onInputClick);
 
     // picker event listeners
     this.pickerEl.addEventListener("click", (e) => {
       e.stopPropagation();
+      const action = e.target.closest(`[data-action]`)?.dataset.action;
+
+      if (action) {
+        this._handleAction(action);
+        return;
+      }
+
+      // Day click event
+      // tim phan tu gan nhat co class date-picker-daycell
+
+      const dayEl = e.target.closest(".date-picker-daycell");
+
+      if (dayEl && !dayEl.classList.contains("disable")) {
+        const day = parseInt(dayEl.dataset.day);
+        const month = parseInt(dayEl.dataset.month);
+        const year = parseInt(dayEl.dataset.year);
+        // select date
+        this._selectDate(year, month, day);
+      }
+    });
+    // documentClick
+    document
+      .querySelector("body")
+      .addEventListener("click", this._onDocumentClick);
+  }
+
+  _selectDate(year, month, day) {
+    const selectedDate = new Date(year, month, day);
+    this.state.setSelectedDate(selectedDate);
+  }
+
+  _updateInput() {
+    const selectedDate = this.state.get("selectedDate");
+    if (selectedDate) {
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+
+      this.inputEl.value = `${months[selectedDate.getMonth()]} ${selectedDate.getDate()}, ${selectedDate.getFullYear()}`;
+    } else {
+      this.inputEl.value = ``;
+    }
+  }
+
+  _handleAction(action) {
+    switch (action) {
+      case "prev-year":
+        // emit view change
+        this.state.navigate(0, -1);
+        break;
+
+      case "prev-month":
+        // emit view change
+        this.state.navigate(-1, 0);
+        break;
+
+      case "next-month":
+        // emit view change
+        this.state.navigate(1, 0);
+        break;
+
+      case "next-year":
+        // emit view change
+        this.state.navigate(0, 1);
+        break;
+
+      case "today":
+        // emit view change
+        this.state.goToday();
+        break;
+
+      case "clear":
+        // emit view change
+        this.state.clear();
+        break;
+    }
+  }
+
+  _subscribeToState() {
+    // when view changes
+    this.eventBus.on(EVENTS.VIEW_CHANGE, () => {
+      // when view change -> render
+      this._render();
+    });
+
+    // When picker opens/closes
+    this.eventBus.on(stateEvent("isOpen"), ({ value }) => {
+      this.pickerEl.style.display = value ? "block" : "none";
+      if (value) {
+        // lay selected Date
+        const selectedDate = this.state.get("selectedDate");
+        if (selectedDate) {
+          this.state.setView(
+            selectedDate.getMonth(),
+            selectedDate.getFullYear(),
+          );
+        }
+      }
+    });
+
+    // when selected date
+    this.eventBus.on(EVENTS.DATE_SELECT, (date) => {
+      this._updateInput();
+      this._render();
     });
   }
 
-  _subscribeToState() {}
-
   _render() {
     const { viewMonth, viewYear, selectedDate } = this.state.getState();
+
     const monthNames = [
       "January",
       "February",
@@ -118,17 +255,17 @@ export class DatePicker {
     //   render current Month
     this.titleEl.textContent = `${monthNames[viewMonth]} ${viewYear}`;
 
-    // get the first day of the month
-    const firstDay = this.getMondayFirstDay(viewYear, viewMonth);
-    // tinh total day of months bang cach check ngay cuoi thang
-    const totalDayOfMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    this._renderDays(viewMonth, viewYear, selectedDate);
+  }
 
-    // lay ngay cuooi cua thangs truoc
-    const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
-    console.log({ totalDayOfMonth, prevMonthDays, firstDay });
+  _renderDays(month, year, selectedDate) {
+    const today = new Date();
+
+    const firstDay = this._getMondayFirstDay(year, month);
+    const totalDayOfMonth = new Date(year, month + 1, 0).getDate();
+    const prevMonthDays = new Date(year, month, 0).getDate();
 
     let calendar = [];
-
     // add ngay thang truoc
     //   - Nếu là Chủ Nhật (0) → trả về 6 (ngày cuối tuần).
     // - Nếu là Thứ Hai (1) → trả về 0 (ngày đầu tuần).
@@ -157,32 +294,26 @@ export class DatePicker {
       daydiv.textContent = day.day;
 
       if (day.type === "current") {
-        // chỉ gắn sự kiện click cho ngày trong tháng hiện tại
-        daydiv.addEventListener("click", () => {
-          selectDate(viewYear, viewMonth, day.day);
-        });
+        // add dataset
+        daydiv.dataset.day = day.day;
+        daydiv.dataset.month = month;
+        daydiv.dataset.year = year;
       } else {
         // thêm class để làm mờ
         daydiv.classList.add("disabled");
       }
-      const today = new Date();
-      const todayDate = today.getDate();
-      const todayMonth = today.getMonth();
-      const todayYear = today.getFullYear();
 
       if (
-        day.day === todayDate &&
         day.type == "current" &&
-        viewMonth === todayMonth &&
-        viewYear === todayYear
+        this._isSameDay(new Date(year, month, day.day), today)
       ) {
         daydiv.classList.add("today");
       }
 
       if (
+        day.type == "current" &&
         selectedDate &&
-        day.day == selectedDate.getDate() &&
-        day.type == "current"
+        this._isSameDay(new Date(year, month, day.day), selectedDate)
       ) {
         daydiv.style.backgroundColor = "lightcoral";
       }
@@ -191,7 +322,15 @@ export class DatePicker {
     });
   }
 
-  getMondayFirstDay(year, month) {
+  _isSameDay(date1, date2) {
+    return (
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    );
+  }
+
+  _getMondayFirstDay(year, month) {
     let d = new Date(year, month, 1).getDay(); // 0 = CN
     return d === 0 ? 6 : d - 1; // dịch: T2=0, T3=1, ..., CN=6
   }

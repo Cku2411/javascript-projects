@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="date-picker-header">
+      <div class="date-picker-nav">
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="prev-year"
+          title="Previous Year"
+        >
+          «
+        </button>
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="prev-month"
+          title="Previous Month"
+        >
+          ‹
+        </button>
+      </div>
+      <span class="date-picker-title"></span>
+      <div class="bw-datepicker__nav">
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="next-month"
+          title="Next Month"
+        >
+          ›
+        </button>
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="next-year"
+          title="Next Year"
+        >
+          »
+        </button>
+      </div>
+    </div>
+
+    <div class="date-picker-calendar">
+      <div class="date-picker-weekdays">
+        <div class="date-picker__weekday">Mo</div>
+        <div class="date-picker__weekday">Tu</div>
+        <div class="date-picker__weekday">We</div>
+        <div class="date-picker__weekday">Th</div>
+        <div class="date-picker__weekday">Fr</div>
+        <div class="date-picker__weekday">Sa</div>
+        <div class="date-picker__weekday">Su</div>
+      </div>
+
+      <div class="date-picker-days"></div>
+    </div>
+
+    <div class="date-picker__footer">
+      <button class="date-picker__today-btn" data-action="today">Today</button>
+      <button class="date-picker__clear-btn" data-action="clear">Clear</button>
+    </div>
+  </body>
+</html>
