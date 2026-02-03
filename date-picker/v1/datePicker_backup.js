@@ -1,4 +1,3 @@
-import { CalendarView } from "./calendar-view.js";
 import EVENTS, { stateEvent } from "./constants.js";
 import EventBus from "./eventBus.js";
 import StateManager from "./stateManager.js";
@@ -12,27 +11,83 @@ export class DatePicker {
       selectedDate: options.initiaDate || null,
     });
 
-    // Pickle El
     this.pickerEl = null;
-    this._createPickerEl();
+    this.dayscontainer = null;
+    this.titleEl = null;
 
-    // calenderview
-    this.view = new CalendarView(this.pickerEl, this.eventBus, options);
-
-    // bind funtion
     this._onInputClick = this._onInputClick.bind(this);
     this._onDocumentClick = this._onDocumentClick.bind(this);
 
     // initiate calendar
 
+    this._createDOM();
     this._setUpEventListeners();
     this._subscribeToState();
-    this.view.render(this.state.getState());
+    this._render();
   }
 
-  _createPickerEl() {
+  _createDOM() {
     this.pickerEl = document.createElement("div");
     this.pickerEl.className = "date-picker-container";
+    this.pickerEl.innerHTML = `
+    <div class="date-picker-header">
+      <div class="date-picker-nav">
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="prev-year"
+          title="Previous Year"
+        >
+          «
+        </button>
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="prev-month"
+          title="Previous Month"
+        >
+          ‹
+        </button>
+      </div>
+      <span class="date-picker-title"></span>
+      <div class="bw-datepicker__nav">
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="next-month"
+          title="Next Month"
+        >
+          ›
+        </button>
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="next-year"
+          title="Next Year"
+        >
+          »
+        </button>
+      </div>
+    </div>
+
+    <div class="date-picker-calendar">
+      <div class="date-picker-weekdays">
+        <div class="date-picker__weekday">Mo</div>
+        <div class="date-picker__weekday">Tu</div>
+        <div class="date-picker__weekday">We</div>
+        <div class="date-picker__weekday">Th</div>
+        <div class="date-picker__weekday">Fr</div>
+        <div class="date-picker__weekday">Sa</div>
+        <div class="date-picker__weekday">Su</div>
+      </div>
+
+      <div class="date-picker-days"></div>
+    </div>
+
+    <div class="date-picker__footer">
+      <button class="date-picker__today-btn" data-action="today">Today</button>
+      <button class="date-picker__clear-btn" data-action="clear">Clear</button>
+    </div>
+    `;
+
+    this.dayscontainer = this.pickerEl.querySelector(".date-picker-days");
+    this.titleEl = this.pickerEl.querySelector(".date-picker-title");
 
     // chèn pickerEL vào trước nextSibling của input (có nghĩa nó sẽ nằm ngay sau input)
     this.inputEl.parentNode.insertBefore(

@@ -54,6 +54,11 @@ body {
   padding: 12px;
 }
 
+/* Calendar Grid */
+/* .date-picker-calendar { */
+/* padding: 8px 12px 12px;
+} */
+
 .date-picker-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);

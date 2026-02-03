@@ -1,3 +1,4 @@
+import EVENTS from "./constants.js";
 import EventBus from "./eventBus.js";
 
 export class CalendarView {
@@ -28,6 +29,7 @@ export class CalendarView {
   }
 
   _isSameDay(date1, date2) {
+    if (!date1 || !date2) return false;
     return (
       date1.getDate() === date2.getDate() &&
       date1.getMonth() === date2.getMonth() &&
@@ -134,7 +136,6 @@ export class CalendarView {
   // ===== HTML Render ===
   _renderHeader(monthName, year) {
     return `
-
         <div class="date-picker-header">
       <div class="date-picker-nav">
         <button
@@ -229,8 +230,6 @@ export class CalendarView {
   render(state) {
     const { viewMonth, viewYear, selectedDate, isOpen } = state;
 
-    console.log("vao khong");
-
     // renrCOntext
     const renderContext = {
       month: viewMonth,
@@ -248,15 +247,84 @@ export class CalendarView {
 
     let html = ``;
     const headerHtml = this._renderHeader(
-      renderContext.month,
+      renderContext.monthName,
       renderContext.year,
     );
 
-    html = `${headerHtml}`;
+    const weekdaysHtml = this._renderWeekdays();
+    const daysHtml = renderContext.days
+      .map((day) => this._renderDay(day))
+      .join("");
+
+    const footerHtml = this._renderFooter();
+
+    html = `
+    ${headerHtml}
+     <div class="date-picker-calendar">
+      <div class="date-picker-weekdays">
+      ${weekdaysHtml}
+      </div>
+
+      <div class="date-picker-days">
+      ${daysHtml}
+      </div>
+    </div>
+    ${footerHtml}
+    `;
 
     this.container.innerHTML = html;
+
+    // cchae this html
+    this._cacheElements();
   }
 
+  /**
+   * Partial update - just the days grid (more efficient for navigation)
+   * @param {Object} state - Current state
+   */
+
+  renderDays(state) {
+    const { viewMonth, viewYear, selectedDate, isOpen } = state;
+    if (!this.element.days) {
+      // neu chua co thi full render calendar
+      return this.render(state);
+    }
+
+    // generate new daysdata
+    const days = this._generateMonthGrid(viewYear, viewMonth, selectedDate);
+
+    // render just days
+    const daysHmtl = days.map((day) => this._renderDay(day)).join("");
+    // update day element
+    this.element.days.innerHTML = daysHmtl;
+
+    // update title
+    if (this.element.title) {
+      this.element.title.textContent = `${this._getMonthName(viewMonth)} ${viewYear}`;
+    }
+
+    // emit partial render event
+    this.eventBus.emit(EVENTS.VIEW_DAY_RENDERED, {
+      month: viewMonth,
+      year: viewYear,
+    });
+  }
+
+  /**
+   * Update just the selected state (most efficient)
+   * @param {Date|null} selectedDate - New selected date
+   * @param {Date|null} previousDate - Previous selected date
+   */
+
   // =====
-  _cacheElements() {}
+  _cacheElements() {
+    this.element = {
+      calendar: this.container.querySelector(".date-picker-calendar"),
+      header: this.container.querySelector(".date-picker-header"),
+      title: this.container.querySelector(".date-picker-title"),
+      weeksday: this.container.querySelector(".date-picker-weekdays"),
+      days: this.container.querySelector(".date-picker-days"),
+      footer: this.container.querySelector(".date-picker__footer"),
+    };
+  }
 }
