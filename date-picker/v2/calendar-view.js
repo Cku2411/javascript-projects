@@ -1,4 +1,4 @@
-import EventBus from "./eventBus";
+import EventBus from "./eventBus.js";
 
 export class CalendarView {
   /**
@@ -38,6 +38,24 @@ export class CalendarView {
   _isWeekend(date) {
     const day = date.getDay();
     return day === 0 || day === 6;
+  }
+
+  _getMonthName(month) {
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    return months[month];
   }
 
   _generateMonthGrid(year, month, selectedDate) {
@@ -112,4 +130,133 @@ export class CalendarView {
 
     return calendar;
   }
+
+  // ===== HTML Render ===
+  _renderHeader(monthName, year) {
+    return `
+
+        <div class="date-picker-header">
+      <div class="date-picker-nav">
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="prev-year"
+          title="Previous Year"
+        >
+          «
+        </button>
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="prev-month"
+          title="Previous Month"
+        >
+          ‹
+        </button>
+      </div>
+      <span class="date-picker-title">${monthName} ${year}</span>
+      <div class="bw-datepicker__nav">
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="next-month"
+          title="Next Month"
+        >
+          ›
+        </button>
+        <button
+          class="bw-datepicker__nav-btn"
+          data-action="next-year"
+          title="Next Year"
+        >
+          »
+        </button>
+      </div>
+    </div>
+    `;
+  }
+
+  _renderWeekdays() {
+    const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+    return weekdays
+      .map((name) => `<div class="date-picker__weekday">${name}</div>`)
+      .join("");
+  }
+
+  _renderDay(dayData) {
+    const classes = ["date-picker-daycell"];
+
+    if (!dayData.isCurrentMonth) {
+      // thêm class để làm mờ
+      classes.push("disabled");
+    }
+    if (dayData.isToday) {
+      classes.push("today");
+    }
+    if (dayData.isSelected) {
+      classes.push("date-picker-daycell--selected");
+    }
+    if (dayData.isWeekend) {
+      classes.push("date-picker-daycell--weekend");
+    }
+    if (dayData.isDisabled) {
+      classes.push("disabled");
+    }
+
+    return `
+     <div class="${classes.join(" ")}"
+           data-day="${dayData.day}"
+           data-month="${dayData.month}"
+           data-year="${dayData.year}">
+        ${dayData.day}
+      </div>
+
+    `;
+  }
+  _renderFooter(hasSelection) {
+    return `
+        <div class="date-picker__footer">
+      <button class="date-picker__today-btn" data-action="today">Today</button>
+      <button class="date-picker__clear-btn" data-action="clear" ${!hasSelection ? "disabled" : ""}>Clear</button>
+    </div>
+
+    `;
+  }
+
+  // =====Main render===
+  /**
+   * Full render of the calendar
+   * @param {Object} state - Current state from StateManager
+   */
+  render(state) {
+    const { viewMonth, viewYear, selectedDate, isOpen } = state;
+
+    console.log("vao khong");
+
+    // renrCOntext
+    const renderContext = {
+      month: viewMonth,
+      year: viewYear,
+      monthName: this._getMonthName(viewMonth),
+      selectedDate,
+      isOpen,
+      days: this._generateMonthGrid(viewYear, viewMonth, selectedDate),
+    };
+
+    // store for reference
+    this.currentRenderState = renderContext;
+
+    // Build complete HTML
+
+    let html = ``;
+    const headerHtml = this._renderHeader(
+      renderContext.month,
+      renderContext.year,
+    );
+
+    html = `${headerHtml}`;
+
+    this.container.innerHTML = html;
+  }
+
+  // =====
+  _cacheElements() {}
 }

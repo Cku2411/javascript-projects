@@ -86,7 +86,7 @@ body {
   pointer-events: none; /* không cho click */
 }
 
-.date-picker-daycell.selected {
+.date-picker-daycell--selected {
   background-color: lightcoral;
 }
 
