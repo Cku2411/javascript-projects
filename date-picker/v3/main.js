@@ -2,6 +2,4 @@ import { CalendarView } from "./calendar-view.js";
 import { DatePicker } from "./datePicker.js";
 
 const inputEl = document.querySelector(".date-picker-input");
-const inputEl2 = document.querySelector(".date-picker-input2");
 const datePicker = new DatePicker(inputEl);
-const datePicker2 = new DatePicker(inputEl2);

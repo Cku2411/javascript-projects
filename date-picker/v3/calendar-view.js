@@ -1,5 +1,6 @@
 import EVENTS from "./constants.js";
 import EventBus from "./eventBus.js";
+import SlotManager from "./slotManager.js";
 
 export class CalendarView {
   /**
@@ -13,6 +14,12 @@ export class CalendarView {
     this.eventBus = eventBus;
     this.options = options;
 
+    //initiate slot manager
+    this.slots = new SlotManager();
+    if (options.slots) {
+      this.slots.setMultiple(options.slots);
+    }
+
     // Dom structure
     this.element = {
       calendar: null,
@@ -23,6 +30,57 @@ export class CalendarView {
       footer: null,
     };
   }
+
+  // =====
+  _cacheElements() {
+    this.element = {
+      calendar: this.container.querySelector(".date-picker-calendar"),
+      header: this.container.querySelector(".date-picker-header"),
+      title: this.container.querySelector(".date-picker-title"),
+      weeksday: this.container.querySelector(".date-picker-weekdays"),
+      days: this.container.querySelector(".date-picker-days"),
+      footer: this.container.querySelector(".date-picker__footer"),
+    };
+  }
+
+  setVisibility(isOpen) {
+    this.container.style.display = isOpen ? "block" : "none";
+  }
+
+  updateSelection(selectedDate, previousDate) {
+    console.log({ selectedDate, previousDate });
+
+    if (!this.element.days) return;
+    // remove section from previous
+    if (previousDate) {
+      const prevEl = this._findDayElement(previousDate);
+      if (prevEl) {
+        prevEl.classList.remove("date-picker-daycell--selected");
+      }
+    }
+
+    // add selection to new
+    if (selectedDate) {
+      const newEl = this._findDayElement(selectedDate);
+
+      if (newEl) {
+        newEl.classList.add("date-picker-daycell--selected");
+      }
+    }
+
+    // update clear button state
+    const clearBtn = this.container.querySelector('[data-action="clear"]');
+    if (clearBtn) {
+      clearBtn.disabled = !selectedDate;
+    }
+  }
+
+  // HELPERFUNTCION
+
+  _getWeekdayNames() {
+    return ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+  }
+
   _getMondayFirstDay(year, month) {
     let d = new Date(year, month, 1).getDay(); // 0 = CN
     return d === 0 ? 6 : d - 1; // dịch: T2=0, T3=1, ..., CN=6
@@ -252,39 +310,32 @@ export class CalendarView {
       selectedDate,
       isOpen,
       days: this._generateMonthGrid(viewYear, viewMonth, selectedDate),
+      weeksdays: this._getWeekdayNames(),
     };
 
     // store for reference
     this.currentRenderState = renderContext;
 
-    // Build complete HTML
+    // Build complete HTML with slot
 
     let html = ``;
-    const headerHtml = this._renderHeader(
-      renderContext.monthName,
-      renderContext.year,
-    );
 
-    const weekdaysHtml = this._renderWeekdays();
-    const daysHtml = renderContext.days
-      .map((day) => this._renderDay(day))
-      .join("");
+    const headerHtml = this.slots.render("header", {
+      month: renderContext.month,
+      year: renderContext.year,
+      monthName: renderContext.monthName,
+    });
 
-    const footerHtml = this._renderFooter();
+    console.log(renderContext.weeksdays, renderContext.days);
 
-    html = `
-    ${headerHtml}
-     <div class="date-picker-calendar">
-      <div class="date-picker-weekdays">
-      ${weekdaysHtml}
-      </div>
+    const calendarHtml = this.slots.render("calendar", {
+      weekdays: renderContext.weeksdays,
+      days: renderContext.days,
+      weekdaySlot: (name, index) => this.slots.render("weekday", name, index),
+      daySlot: (day) => this.slots.render("day", day),
+    });
 
-      <div class="date-picker-days">
-      ${daysHtml}
-      </div>
-    </div>
-    ${footerHtml}
-    `;
+    html = `${headerHtml} ${calendarHtml}`;
 
     this.container.innerHTML = html;
 
@@ -322,55 +373,5 @@ export class CalendarView {
       month: viewMonth,
       year: viewYear,
     });
-  }
-
-  /**
-   * Update just the selected state (most efficient)
-   * @param {Date|null} selectedDate - New selected date
-   * @param {Date|null} previousDate - Previous selected date
-   */
-
-  // =====
-  _cacheElements() {
-    this.element = {
-      calendar: this.container.querySelector(".date-picker-calendar"),
-      header: this.container.querySelector(".date-picker-header"),
-      title: this.container.querySelector(".date-picker-title"),
-      weeksday: this.container.querySelector(".date-picker-weekdays"),
-      days: this.container.querySelector(".date-picker-days"),
-      footer: this.container.querySelector(".date-picker__footer"),
-    };
-  }
-
-  setVisibility(isOpen) {
-    this.container.style.display = isOpen ? "block" : "none";
-  }
-
-  updateSelection(selectedDate, previousDate) {
-    console.log({ selectedDate, previousDate });
-
-    if (!this.element.days) return;
-    // remove section from previous
-    if (previousDate) {
-      const prevEl = this._findDayElement(previousDate);
-      if (prevEl) {
-        prevEl.classList.remove("date-picker-daycell--selected");
-      }
-    }
-
-    // add selection to new
-    if (selectedDate) {
-      const newEl = this._findDayElement(selectedDate);
-
-      if (newEl) {
-        newEl.classList.add("date-picker-daycell--selected");
-      }
-    }
-
-    // update clear button state
-    const clearBtn = this.container.querySelector('[data-action="clear"]');
-    if (clearBtn) {
-      clearBtn.disabled = !selectedDate;
-    }
   }
 }
