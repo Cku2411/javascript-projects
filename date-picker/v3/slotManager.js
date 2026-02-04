@@ -7,8 +7,6 @@ class SlotManager {
        * @param {Object} dayData - Day information
        */
       day: (dayData) => {
-        console.log({ dayData });
-
         const classes = ["date-picker-daycell"];
 
         if (!dayData.isCurrentMonth) {
@@ -137,7 +135,7 @@ class SlotManager {
         const daysHmtl = data.days.map((day) => data.daySlot(day)).join("");
 
         return `
-     <div class="date-picker-calendar" role="grid>
+     <div class="date-picker-calendar" role="grid">
       <div class="date-picker-weekdays" role="row">
       ${weekdaysHtml}
       </div>

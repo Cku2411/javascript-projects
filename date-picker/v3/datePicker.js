@@ -6,12 +6,18 @@ import StateManager from "./stateManager.js";
 export class DatePicker {
   constructor(inputElement, options = {}) {
     this.inputEl = inputElement;
-    this.options = options;
     this.eventBus = new EventBus();
+    this.options = {
+      format: "medium",
+      plugins: [],
+      ...options,
+    };
+
     this.state = new StateManager(this.eventBus, {
       selectedDate: options.initiaDate || null,
     });
 
+    this._plugins = new Map();
     // Pickle El
     this.pickerEl = null;
     this._createPickerEl();
@@ -27,7 +33,50 @@ export class DatePicker {
 
     this._setUpEventListeners();
     this._subscribeToState();
+
+    this._installPlugins();
+
+    // Render calendar
     this.view.render(this.state.getState());
+  }
+
+  _installPlugins() {
+    const { plugins } = this.options;
+    if (!plugins || plugins.length === 0) return;
+
+    for (const item of plugins) {
+      // check if plugin is array
+      if (Array.isArray(item)) {
+        this.use(item[0], item[1]);
+      } else {
+        this.use(item);
+      }
+    }
+  }
+
+  use(plugin, options = {}) {
+    if (!plugin || !plugin.name || typeof plugin.install !== "function") {
+      console.warn("Invalid plugin...");
+      return;
+    }
+
+    if (this._plugins.has(plugin.name)) {
+      console.warn(`Plugin ${plugin.name} has already installed`);
+    }
+
+    try {
+      const cleanUp = plugin.install(this, options);
+      // add plugin Map
+      this._plugins.set(plugin.name, {
+        plugin,
+        cleanUp: typeof cleanUp == "function" ? cleanUp : null,
+      });
+
+      // emit function
+      this.eventBus.emit("plugin:installed", { name: plugin.name });
+    } catch (error) {
+      console.error(`Faild to installl plugin : ${plugin.name}`);
+    }
   }
 
   _createPickerEl() {
