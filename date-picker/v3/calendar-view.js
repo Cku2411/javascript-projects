@@ -21,6 +21,26 @@ export class CalendarView {
       this.slots.setMultiple(options.slots);
     }
 
+    // render pipeline hook
+    this.hooks = {
+      beforeRender: [], // Called before full render, can modify context
+      afterRender: [], // Called after full render, has access to DOM
+      beforeDayRender: [], // Called for each day, can modify day data
+      afterDayRender: [], // Called after days rendered
+    };
+
+    // Register any Hooks from options
+    if (options.hooks) {
+      Object.entries(options.hooks).forEach(([hookName, callbacks]) => {
+        // check if callback an array
+        const callbackArray = Array.isArray(callbacks)
+          ? callbacks
+          : [callbacks];
+
+        callbackArray.forEach((cb) => this.addHook(hookName, cb));
+      });
+    }
+
     // Dom structure
     this.element = {
       calendar: null,
@@ -33,6 +53,49 @@ export class CalendarView {
   }
 
   // =====
+  /**
+   *
+   * @param {string} hookName
+   * @param {Function} callback
+   */
+  addHook(hookName, callback) {
+    if (!this.hooks[hookName]) {
+      console.warn(`Unknown hook: ${hookName}`);
+      return () => {};
+    }
+
+    this.hooks[hookName].push(callback);
+    console.log({ hooks: this.hooks });
+
+    // return function to remove this hook
+    return () => {
+      // find index and remove
+      const index = this.hooks[hookName].indexOf(callback);
+      if (index > -1) {
+        this.hooks[hookName].splice(index, 1);
+      }
+    };
+  }
+
+  _runHooks(hookName, data) {
+    if (!this.hooks[hookName]) return data;
+    let result = data;
+
+    for (const hook of this.hooks[hookName]) {
+      try {
+        const hookResult = hook(result);
+        // allow hooks to return modified data
+        if (hookResult !== undefined) {
+          result = hookResult;
+        }
+      } catch (error) {
+        console.error(`Error in ${hookName} hook`, error);
+      }
+    }
+
+    return result;
+  }
+
   _cacheElements() {
     this.element = {
       calendar: this.container.querySelector(".date-picker-calendar"),
@@ -149,7 +212,7 @@ export class CalendarView {
     const { viewMonth, viewYear, selectedDate, isOpen } = state;
 
     // renrCOntext
-    const renderContext = {
+    let renderContext = {
       month: viewMonth,
       year: viewYear,
       monthName: getMonthName(viewMonth),
@@ -159,8 +222,16 @@ export class CalendarView {
       weeksdays: getWeekdayNames(),
     };
 
+    // before Render run hook
+    renderContext = this._runHooks("beforeRender", renderContext);
+
     // store for reference
     this.currentRenderState = renderContext;
+
+    // before Day render hooks
+    renderContext.days = renderContext.days.map((day) => {
+      return this._runHooks("beforeDayRender", { ...day });
+    });
 
     // Build complete HTML with slot
 
@@ -189,6 +260,12 @@ export class CalendarView {
 
     // cchae this html
     this._cacheElements();
+
+    // run afterRenderHooks (access to Dom elements)
+    this._runHooks("afterRender", {
+      context: renderContext,
+      elements: this.element,
+    });
   }
 
   /**
@@ -204,7 +281,10 @@ export class CalendarView {
     }
 
     // generate new daysdata
-    const days = generateMonthGrid(viewYear, viewMonth, selectedDate);
+    let days = generateMonthGrid(viewYear, viewMonth, selectedDate);
+
+    // run through beforeDayRender hooks
+    days = days.map((day) => this._runHooks("beforeDayRender", { ...day }));
 
     // render just days
     const daysHmtl = days.map((day) => this.slots.render("day", day)).join("");

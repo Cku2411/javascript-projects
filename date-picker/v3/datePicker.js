@@ -4,6 +4,10 @@ import EventBus from "./eventBus.js";
 import StateManager from "./stateManager.js";
 
 export class DatePicker {
+  /**
+   * @param {HTMLElement} inputElement
+   * @param {{}} [options={}]
+   */
   constructor(inputElement, options = {}) {
     this.inputEl = inputElement;
     this.eventBus = new EventBus();
@@ -42,6 +46,9 @@ export class DatePicker {
 
   _installPlugins() {
     const { plugins } = this.options;
+
+    console.log({ plugins });
+
     if (!plugins || plugins.length === 0) return;
 
     for (const item of plugins) {
@@ -77,6 +84,7 @@ export class DatePicker {
     } catch (error) {
       console.error(`Faild to installl plugin : ${plugin.name}`);
     }
+    return this;
   }
 
   _createPickerEl() {
@@ -120,7 +128,7 @@ export class DatePicker {
 
       const dayEl = e.target.closest(".date-picker-daycell");
 
-      if (dayEl && !dayEl.classList.contains("disable")) {
+      if (dayEl && !dayEl.classList.contains("disabled")) {
         const day = parseInt(dayEl.dataset.day);
         const month = parseInt(dayEl.dataset.month);
         const year = parseInt(dayEl.dataset.year);
@@ -224,5 +232,34 @@ export class DatePicker {
       this.view.updateSelection(date, preDate);
       this._updateInput();
     });
+  }
+
+  destroy() {
+    // remove plugin
+    for (const [name, entry] of this._plugins) {
+      if (entry.cleanUp) {
+        try {
+          entry.cleanUp();
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    }
+    // remove eventlistener
+    this.inputEl.removeEventListener("click", this._onInputClick);
+    document.removeEventListener("click", this._onDocumentClick);
+
+    this.eventBus.clear();
+    this.pickerEl.remove();
+    this.eventBus.emit(EVENTS.PICKER_DESTROY);
+  }
+
+  addHook(hookName, callback) {
+    return this.view.addHook(hookName, callback);
+  }
+
+  // Public API
+  on(event, callback) {
+    return this.eventBus.on(event, callback);
   }
 }
