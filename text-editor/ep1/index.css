@@ -1,0 +1,39 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --border-light: #e2e8f0;
+}
+
+body {
+  text-align: center;
+  width: 100%;
+  min-height: 100vh;
+  /* display: flex;
+  justify-content: center; */
+  padding: 20px;
+}
+
+.main {
+  max-width: 800px;
+  margin: auto;
+}
+
+.ck-editor {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.ck-editor__content {
+  min-height: 300px;
+  padding: 1.25rem;
+  outline: none;
+  font-size: 1rem;
+}
