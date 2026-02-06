@@ -81,3 +81,25 @@ img {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
   z-index: 4;
 }
+
+.arrows div {
+  background-color: white;
+  width: 7px;
+  height: 120px;
+  position: absolute;
+  transform-origin: bottom center;
+  bottom: 50%;
+  z-index: 3;
+  border-radius: 50% 50% 0 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.arrows .hour {
+  height: 80px;
+  transform: rotate(30deg);
+}
+
+.arrows .second {
+  transform: rotate(60deg);
+  background: goldenrod;
+}
