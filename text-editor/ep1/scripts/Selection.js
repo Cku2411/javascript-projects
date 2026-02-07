@@ -13,6 +13,15 @@ export class Selection {
     return window.getSelection();
   }
 
+  // getselected TExdt
+  getSelectedText() {
+    return this.getSelection().toString();
+  }
+
+  isCollapsed() {
+    return this.getSelection().isCollapsed;
+  }
+
   //   get curretn range
   getRange() {
     const selection = this.getSelection();
@@ -41,5 +50,28 @@ export class Selection {
       selection.removeAllRanges();
       selection.addRange(this.saveRange);
     }
+  }
+
+  // insert HTML
+  insertHTML(html) {
+    this.restore();
+    const range = this.getRange();
+
+    if (!range) return;
+
+    range.deleteContents();
+    const fragment = range.createContextualFragment(html);
+    range.insertNode(fragment);
+    range.collapse(false);
+  }
+
+  // insertText() giống như insertHTML(), nhưng chỉ chèn text thuần, không cho phép các ký tự đặc biệt (<, >, &) bị hiểu thành thẻ HTML.
+
+  insertText(text) {
+    const escaped = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    this.insertHTML(escaped);
   }
 }

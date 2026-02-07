@@ -1,5 +1,6 @@
 import { EVENTS } from "./constanst.js";
 import { EventEmiiter } from "./EventEmitter.js";
+import Formatter from "./Formatter.js";
 import { Selection } from "./Selection.js";
 
 export class TextEditor {
@@ -48,6 +49,7 @@ export class TextEditor {
 
     // create selection manager
     this.selection = new Selection(this.wrapper);
+    this.formatter = new Formatter(this.wrapper, this.selection);
   }
 
   bindEvent() {
@@ -89,5 +91,45 @@ export class TextEditor {
    */
   restoreSelection() {
     this.selection.restore();
+  }
+  insertHtml(html) {
+    this.selection.insertHTML(html);
+  }
+  insertText(text) {
+    this.selection.insertText(text);
+  }
+
+  getSelectedText() {
+    return this.selection.getSelectedText();
+  }
+
+  /**
+   * Check ifselection is collapsed (just a cursor)
+   * @returns {boolean}
+   */
+  isCollapsed() {
+    return this.selection.isCollapsed();
+  }
+
+  // FORMATER
+  bold() {
+    this.formatter.bold();
+  }
+
+  italic() {
+    this.formatter.italic();
+  }
+
+  underline() {
+    this.formatter.underline();
+  }
+
+  strikethrough() {
+    this.formatter.strikethrough();
+  }
+
+  //
+  clearFormat() {
+    this.formatter.clear();
   }
 }
