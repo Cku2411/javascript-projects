@@ -1,21 +1,41 @@
 * {
   box-sizing: border-box;
   margin: 0;
+  font-family: "Courier New", Courier, monospace;
 }
 
 :root {
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
   --border-light: #e2e8f0;
+  --bw-bg-primary: #ffffff;
+  --bw-bg-secondary: #f8fafc;
+  --bw-bg-tertiary: #f1f5f9;
+  --bw-border-light: #e2e8f0;
+  --bw-border-default: #cbd5e1;
+  --bw-text-primary: #0f172a;
+  --bw-text-secondary: #475569;
+  --bw-text-muted: #64748b;
+  --bw-accent: #10b981;
+  --bw-accent-hover: #059669;
+  --bw-accent-light: #d1fae5;
+  --bw-radius: 8px;
+  --bw-radius-lg: 12px;
+  --bw-font-sans: "Outfit", system-ui, sans-serif;
+  --bw-font-mono: "JetBrains Mono", monospace;
+  --bw-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 body {
-  text-align: center;
   width: 100%;
   min-height: 100vh;
   /* display: flex;
   justify-content: center; */
   padding: 20px;
+}
+
+.header {
+  text-align: center;
 }
 
 .main {
@@ -29,6 +49,7 @@ body {
   overflow: hidden;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-top: 20px;
 }
 
 .ck-editor__content {
@@ -37,4 +58,15 @@ body {
   outline: none;
   font-size: 1rem;
   line-height: normal;
+  font-weight: 600;
+}
+
+/* place holder*/
+
+.ck-editor__content:empty::before,
+.ck-editor__content:not(:focus):has(p:only-child br:only-child)::before {
+  content: attr(data-placeholder);
+  pointer-events: none;
+  color: var(--bw-text-muted);
+  font-weight: normal;
 }

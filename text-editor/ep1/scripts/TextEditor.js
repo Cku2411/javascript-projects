@@ -1,4 +1,10 @@
+import { EVENTS } from "./constanst.js";
+import { EventEmiiter } from "./EventEmitter.js";
+import { Selection } from "./Selection.js";
+
 export class TextEditor {
+  // private fields
+
   /**
    *
    * @param {string} selector - CSS selector
@@ -7,6 +13,10 @@ export class TextEditor {
    */
   constructor(selector, options = {}) {
     this.container = document.querySelector(selector);
+    this.wrapper = null;
+    this.content = null;
+    this.events = new EventEmiiter();
+    this.selection = null;
 
     // store options with defaults
     this.options = {
@@ -16,9 +26,13 @@ export class TextEditor {
 
     // render editor
     this.render();
+    // add event listener
+    this.bindEvent();
   }
 
   render() {
+    console.log(this.options.placeholder);
+
     // create editor Wrapper
     this.wrapper = document.createElement("div");
     this.wrapper.className = "ck-editor";
@@ -31,5 +45,49 @@ export class TextEditor {
 
     this.wrapper.appendChild(this.content);
     this.container.appendChild(this.wrapper);
+
+    // create selection manager
+    this.selection = new Selection(this.wrapper);
+  }
+
+  bindEvent() {
+    this.content.addEventListener("input", () => {
+      if (this.content.textContent.trim() == "") {
+        this.content.innerHTML = "<p><br></p>";
+      }
+      this.events.emit(EVENTS.CHANGE);
+    });
+
+    this.content.addEventListener("blur", () => {
+      this.events.emit(EVENTS.BLUR);
+    });
+
+    this.content.addEventListener("focus", () => {
+      if (!this.content.innerHTML.trim()) {
+        this.content.innerHTML = "<p><br></p>";
+      }
+      this.events.emit(EVENTS.FOCUS, { data: "is changing" });
+    });
+  }
+
+  // PUBLIC API
+
+  on(event, callback) {
+    this.events.on(event, callback);
+  }
+
+  off(event, callback) {
+    this.events.off(event, callback);
+  }
+
+  saveSelection() {
+    this.selection.save();
+  }
+
+  /**
+   * Restore saved selection
+   */
+  restoreSelection() {
+    this.selection.restore();
   }
 }
