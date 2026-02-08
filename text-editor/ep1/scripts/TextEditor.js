@@ -2,6 +2,7 @@ import { EVENTS } from "./constanst.js";
 import { EventEmiiter } from "./EventEmitter.js";
 import Formatter from "./Formatter.js";
 import { Selection } from "./Selection.js";
+import { ToolBar } from "./Toolbar.js";
 
 export class TextEditor {
   // private fields
@@ -48,6 +49,8 @@ export class TextEditor {
     this.container.appendChild(this.wrapper);
 
     // create selection manager
+    this.toolbar = new ToolBar(this);
+    this.toolbar.render(this.wrapper);
     this.selection = new Selection(this.wrapper);
     this.formatter = new Formatter(this.wrapper, this.selection);
   }
@@ -131,5 +134,13 @@ export class TextEditor {
   //
   clearFormat() {
     this.formatter.clear();
+  }
+
+  isInEditor() {
+    return this.selection.isInEditor();
+  }
+
+  getState() {
+    return this.formatter.getState();
   }
 }

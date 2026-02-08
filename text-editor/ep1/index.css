@@ -58,7 +58,6 @@ body {
   outline: none;
   font-size: 1rem;
   line-height: normal;
-  font-weight: 600;
 }
 
 /* place holder*/
@@ -69,4 +68,49 @@ body {
   pointer-events: none;
   color: var(--bw-text-muted);
   font-weight: normal;
+}
+
+/* TOOLbar */
+
+.ck-toolbar {
+  background: var(--bw-bg-secondary);
+  border-bottom: 1px solid var(--bw-border-light);
+  width: 100%;
+  display: flex;
+  padding: 5px;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.ck-toolbar-seperator {
+  width: 1px;
+  height: 24px;
+  background: var(--bw-border-default);
+  margin: 0 0.5rem;
+}
+
+.ck-toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  font-weight: 600;
+  font-style: 0.93rem;
+  cursor: pointer;
+}
+
+.ck-toolbar-btn:hover {
+  background: var(--bw-bg-tertiary);
+  color: var(--bw-text-primary);
+}
+
+.ck-toolbar-btn.is-active {
+  background: var(--bw-accent-light);
+  color: var(--bw-accent);
+  border-color: var(--bw-accent);
 }

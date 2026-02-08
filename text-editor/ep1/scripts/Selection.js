@@ -31,8 +31,6 @@ export class Selection {
   //   check if current selection is inside editor
   isInEditor() {
     const selection = this.getSelection();
-    console.log(selection.anchorNode);
-
     return selection.anchorNode && this.editorEL.contains(selection.anchorNode);
   }
 

@@ -114,4 +114,17 @@ export default class Formatter {
       this.#exec("formatBlock", "blockquote");
     }
   }
+
+  getState() {
+    // get current blockFormat
+    const blockFormat = document.queryCommandValue("formatBlock").toLowerCase();
+
+    return {
+      // Inline
+      bold: this.isBold(),
+      italic: this.isItalic(),
+      underline: this.isUnderline(),
+      strikethrough: this.isStrikethrough(),
+    };
+  }
 }
