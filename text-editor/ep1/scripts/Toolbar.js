@@ -26,6 +26,7 @@ export class ToolBar {
       { name: "bulletList", label: "•", title: "Bullet List" },
       { name: "numberedList", label: "1.", title: "Numbered List" },
       { name: "blockquote", label: '"', title: "Quote" },
+      { name: "openLinkDialog", label: "link", title: "link" },
     ];
   }
 
@@ -60,6 +61,7 @@ export class ToolBar {
     // add evenlistener
     btn.addEventListener("click", () => {
       console.log(buttonConfig.name);
+      // action
       this.editorInstance[buttonConfig.name]();
       this.updateActiveStates();
     });

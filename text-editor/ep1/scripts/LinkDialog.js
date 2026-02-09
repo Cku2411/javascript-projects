@@ -7,7 +7,25 @@ export class LinkDialog {
    */
   constructor(editorInstance) {
     this.editor = editorInstance;
+    this.isOpen = false;
     this.render();
+    this.bindEvent();
+  }
+
+  bindEvent() {
+    // Cancel button
+    this.dialog
+      .querySelector(".bw-link-dialog__btn--cancel")
+      .addEventListener("click", () => {
+        this.close();
+      });
+
+    this.dialog
+      .querySelector(".bw-link-dialog__btn--submit")
+      .addEventListener("click", () => {
+        console.log("iinser");
+        this.submit();
+      });
   }
 
   render() {
@@ -25,10 +43,32 @@ export class LinkDialog {
       </div>
     `;
 
+    // get inputfield
+    this.input = this.dialog.querySelector(".bw-link-dialog__input");
     document.body.appendChild(this.dialog);
   }
 
   open() {
+    // save selection
+    this.editor.saveSelection();
     this.dialog.classList.add("is-open");
+    this.isOpen = true;
+  }
+  close() {
+    if (this.isOpen) {
+      this.dialog.classList.remove("is-open");
+      this.isOpen = false;
+    }
+  }
+
+  submit() {
+    // get value
+    const value = this.input.value.trim();
+    // add link
+    console.log({ value });
+    this.editor.restoreSelection();
+    this.editor.link(value);
+
+    this.close();
   }
 }
