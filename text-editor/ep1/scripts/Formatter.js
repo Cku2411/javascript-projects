@@ -115,6 +115,18 @@ export default class Formatter {
     }
   }
 
+  // Links
+  link(url) {
+    if (!url) return;
+    this.#exec("createLink", url);
+  }
+
+  unlink() {
+    this.#exec("unlink");
+  }
+
+  // ===
+
   getState() {
     // get current blockFormat
     const blockFormat = document.queryCommandValue("formatBlock").toLowerCase();

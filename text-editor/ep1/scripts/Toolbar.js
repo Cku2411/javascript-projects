@@ -77,12 +77,9 @@ export class ToolBar {
     }
 
     const state = this.editorInstance.getState();
-    console.log({ state });
 
     this.buttons.forEach((btn, name) => {
       if (state.hasOwnProperty(name)) {
-        console.log(state[name]);
-
         btn.classList.toggle("is-active", state[name]);
       }
     });

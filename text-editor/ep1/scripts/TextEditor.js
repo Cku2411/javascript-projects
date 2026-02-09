@@ -1,11 +1,26 @@
 import { EVENTS } from "./constanst.js";
 import { EventEmiiter } from "./EventEmitter.js";
 import Formatter from "./Formatter.js";
+import { LinkDialog } from "./LinkDialog.js";
 import { Selection } from "./Selection.js";
 import { ToolBar } from "./Toolbar.js";
 
 export class TextEditor {
   // private fields
+  #shortcuts = new Map([
+    // Inline formatting
+    ["ctrl+b", "bold"],
+    ["ctrl+i", "italic"],
+    ["ctrl+u", "underline"],
+    ["ctrl+shift+x", "strikethrough"],
+    // Block formatting
+    ["ctrl+1", "heading1"],
+    ["ctrl+2", "heading2"],
+    // Lists & Quote
+    ["ctrl+shift+l", "bulletList"],
+    ["ctrl+shift+o", "numberedList"],
+    ["ctrl+shift+q", "blockquote"],
+  ]);
 
   /**
    *
@@ -19,6 +34,7 @@ export class TextEditor {
     this.content = null;
     this.events = new EventEmiiter();
     this.selection = null;
+    this.linkDialog = new LinkDialog(this);
 
     // store options with defaults
     this.options = {
@@ -72,6 +88,10 @@ export class TextEditor {
         this.content.innerHTML = "<p><br></p>";
       }
       this.events.emit(EVENTS.FOCUS, { data: "is changing" });
+    });
+
+    this.content.addEventListener("keydown", (e) => {
+      this.handleKeyDown(e);
     });
   }
 
@@ -140,7 +160,49 @@ export class TextEditor {
     return this.selection.isInEditor();
   }
 
+  link(url) {
+    this.formatter.link(url);
+  }
+
+  unlink() {
+    this.formatter.unlink();
+  }
+
+  openLinkDialog() {
+    this.linkDialog.open();
+  }
+
   getState() {
     return this.formatter.getState();
+  }
+
+  // handle keydown
+  /**
+   *
+   * @param {KeyboardEvent} e
+   */
+  handleKeyDown(e) {
+    // build key combination string
+    // reset part everytime keydown
+    const parts = [];
+
+    // neu giu phim ctrl || window thi add to part
+    if (e.ctrlKey || e.metaKey) {
+      parts.push("ctrl");
+    }
+    if (e.shiftKey) {
+      parts.push("shift");
+    }
+    parts.push(e.key.toLowerCase());
+
+    const combo = parts.join("+");
+
+    // check shortcut map
+    const action = this.#shortcuts.get(combo);
+    // if action and do la function then aciton
+    if (action && typeof this[action] === "function") {
+      e.preventDefault();
+      this[action]();
+    }
   }
 }
