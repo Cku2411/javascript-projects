@@ -3,7 +3,7 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
+  /* color-scheme: light dark; */
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
 
@@ -54,6 +54,14 @@
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
+/* darktheme */
+[data-theme="dark"] {
+  --color-text: #fafafa;
+  --color-text-secondary: #a3a3a3;
+  --color-background: #1a1a1a;
+  --color-background-page: #0a0a0a;
+  --color-border: #333333;
+}
 a {
   font-weight: 500;
   color: #646cff;

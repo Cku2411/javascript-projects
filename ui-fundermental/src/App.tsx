@@ -1,9 +1,17 @@
 import "./App.css";
-import Card from "./Components/Card";
+import { Card } from "./Components/Card";
+import { useTheme } from "./Components/ThemeContext";
 
 function App() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <div className="main">
+      <div className="theme-toggle">
+        <button className="theme-btn" onClick={toggleTheme}>
+          {theme === "light" ? "🌙 Dark" : "☀️ Light"}
+        </button>
+      </div>
       <div className="cards-holder">
         <Card
           title="Nike Air Max"

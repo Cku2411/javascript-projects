@@ -2,6 +2,20 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
+  position: relative;
+}
+.theme-toggle {
+  display: flex;
+  justify-content: end;
+  margin-bottom: 20px;
+}
+
+.theme-btn {
+  background-color: var(--color-primary);
+  padding: 10px var(--space-2xl);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
 }
 
 .cards-holder {
@@ -74,4 +88,9 @@
   background-color: var(--color-primary);
   color: var(--color-background);
   font-weight: var(--font-semibold);
+}
+/* === */
+.card-selected {
+  background-color: var(--color-primary);
+  border-color: rgba(34, 197, 94, 0.05);
 }
